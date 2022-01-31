@@ -5,19 +5,19 @@ Bidoof is a value matching and transforming tool that you can use to declarative
 API documentation is TODO, but here's a taste:
 
 ```ts
-import { makeBidoof, merge, modify, set, replace, t } from "bidoof";
+import { makeBidoof, merge, transform, set, replace, t } from "bidoof";
 
 const bidoof = makeBidoof([
   // For any object with a meta property that is an object with a name property that is the string "bobby":
   { meta: { name: "bobby" } },
-  // Set the property "something.blah" to 67, and deepMerge an object into it:
+  // Set the property "something.blah" to 67, and deep-merge an object into it:
   set("something.blah", 67),
   merge({ nums: [3] }),
 
   // For any number:
   Number,
   // Increase its value by 56
-  modify((value) => value + 56),
+  transform((value) => value + 56),
 
   // For any object described by this type:
   t.tuple(
