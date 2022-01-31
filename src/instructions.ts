@@ -9,24 +9,36 @@ import { Instruction, makeInstruction } from "./instruction";
  * it uses [immer](https://npm.im/immer) to mutate a draft of it,
  * then replaces the target with a modified copy.
  */
-export function withoutMutating<T>(
-  instruction: Instruction<T>
-): Instruction<T> {
-  return makeInstruction((input: T): T => {
-    return immerProduce(input, (draft: T) => {
+export function withoutMutating(instruction: Instruction): Instruction {
+  return makeInstruction((input) => {
+    return immerProduce(input, (draft) => {
       instruction.modifier(draft);
     });
   });
 }
 
+/**
+ * Deep-merge the provided value into the target. Works on objects, arrays, etc.
+ * Think Object.assign, but recursive.
+ *
+ * When merging arrays, their contents will be replaced by-index.
+ * For example, applying this:
+ *
+ * merge([1, 2, 3])
+ *
+ * to an array like:
+ *
+ * [4, 5]
+ *
+ * would yield this:
+ *
+ * [4, 5, 3]
+ */
 const mergeMutate = (other: any) => {
   return makeInstruction((input) => {
     lodashMerge(input, other);
     return input;
   });
-};
-const mergeNoMutate = (other: any) => {
-  return withoutMutating(mergeMutate(other));
 };
 
 /**
@@ -46,16 +58,22 @@ const mergeNoMutate = (other: any) => {
  *
  * [4, 5, 3]
  */
+const mergeNoMutate = (other: any) => {
+  return withoutMutating(mergeMutate(other));
+};
+
 export const merge = Object.assign(mergeNoMutate, { mutate: mergeMutate });
 
+/**
+ * Write the provided value into the given property path.
+ *
+ * Uses lodash.set.
+ */
 const setMutate = (path: string | Array<string | number>, value: any) => {
   return makeInstruction((input) => {
     lodashSet(input, path, value);
     return input;
   });
-};
-const setNoMutate = (path: string | Array<string | number>, value: any) => {
-  return withoutMutating(setMutate(path, value));
 };
 
 /**
@@ -63,6 +81,10 @@ const setNoMutate = (path: string | Array<string | number>, value: any) => {
  *
  * Uses lodash.set.
  */
+const setNoMutate = (path: string | Array<string | number>, value: any) => {
+  return withoutMutating(setMutate(path, value));
+};
+
 export const set = Object.assign(setNoMutate, { mutate: setMutate });
 
 /**
@@ -76,15 +98,18 @@ export const transform = <Input, Output>(
   return makeInstruction(callback);
 };
 
-const modifyMutate = <T>(callback: (input: T) => void): Instruction<T, T> => {
+/**
+ * Modifies the value using the provided callback.
+ *
+ * The callback should mutate the value somehow (even when using the
+ * non-mutating version of modify, in which case the callback will receive an
+ * immer draft object).
+ */
+const modifyMutate = (callback: (input: any) => void): Instruction => {
   return makeInstruction((input) => {
     callback(input);
     return input;
   });
-};
-
-const modifyNoMutate = <T>(callback: (input: T) => void): Instruction<T, T> => {
-  return withoutMutating(modifyMutate(callback));
 };
 
 /**
@@ -94,81 +119,87 @@ const modifyNoMutate = <T>(callback: (input: T) => void): Instruction<T, T> => {
  * non-mutating version of modify, in which case the callback will receive an
  * immer draft object).
  */
+const modifyNoMutate = (callback: (input: any) => void): Instruction => {
+  return withoutMutating(modifyMutate(callback));
+};
+
 export const modify = Object.assign(modifyNoMutate, { mutate: modifyMutate });
 
 /**
  * Replaces the entire value with something else.
  */
-export const replace = <T>(newValue: T): Instruction<any, T> => {
+export const replace = (newValue: any): Instruction => {
   return makeInstruction(() => newValue);
 };
 
-const appendMutate = <T>(
-  ...items: Array<T>
-): Instruction<Array<T>, Array<T>> => {
+/**
+ * Adds item(s) to the end of an array.
+ */
+const appendMutate = (...items: Array<any>): Instruction => {
   return makeInstruction((input) => {
     input.push(...items);
     return input;
   });
 };
 
-const appendNoMutate = <T>(
-  ...items: Array<T>
-): Instruction<Array<T>, Array<T>> => {
-  return withoutMutating(appendMutate(...items));
-};
-
 /**
  * Adds item(s) to the end of an array.
  */
+const appendNoMutate = (...items: Array<any>): Instruction => {
+  return withoutMutating(appendMutate(...items));
+};
+
 export const append = Object.assign(appendNoMutate, { mutate: appendMutate });
 
-const prependMutate = <T>(
-  ...items: Array<T>
-): Instruction<Array<T>, Array<T>> => {
+/**
+ * Adds item(s) to the start of an Array.
+ */
+const prependMutate = (...items: Array<any>): Instruction => {
   return makeInstruction((input) => {
     input.unshift(...items);
     return input;
   });
 };
 
-const prependNoMutate = <T>(
-  ...items: Array<T>
-): Instruction<Array<T>, Array<T>> => {
+/**
+ * Adds item(s) to the start of an Array.
+ */
+const prependNoMutate = (...items: Array<any>): Instruction => {
   return makeInstruction((input) => {
     return items.concat(input);
   });
 };
 
-/**
- * Adds item(s) to the start of an Array.
- */
 export const prepend = Object.assign(prependNoMutate, {
   mutate: prependMutate,
 });
 
-const deletePropertyMutate = <T = any>(
-  propertyName: string
-): Instruction<T, T> => {
+/**
+ * Deletes a property from an object.
+ */
+const deletePropertyMutate = (propertyName: string): Instruction => {
   return makeInstruction((input) => {
     delete input[propertyName];
     return input;
   });
 };
 
-const deletePropertyNoMutate = <T = any>(
-  propertyName: string
-): Instruction<T, T> => {
-  return withoutMutating(deletePropertyMutate(propertyName));
-};
-
 /**
  * Deletes a property from an object.
  */
+const deletePropertyNoMutate = (propertyName: string): Instruction => {
+  return withoutMutating(deletePropertyMutate(propertyName));
+};
+
 export const deleteProperty = Object.assign(deletePropertyNoMutate, {
   mutate: deletePropertyMutate,
 });
 
+/**
+ * Applies an instruction to a particular sub-path of the target.
+ *
+ * Uses lodash.get and lodash.set.
+ */
 const atMutate = (
   path: string | Array<string | number>,
   instruction: Instruction
@@ -181,6 +212,11 @@ const atMutate = (
   });
 };
 
+/**
+ * Applies an instruction to a particular sub-path of the target.
+ *
+ * Uses lodash.get and lodash.set.
+ */
 const atNoMutate = (
   path: string | Array<string | number>,
   instruction: Instruction
@@ -188,11 +224,6 @@ const atNoMutate = (
   return withoutMutating(atMutate(path, instruction));
 };
 
-/**
- * Applies an instruction to a particular sub-path of the target.
- *
- * Uses lodash.get and lodash.set.
- */
 export const at = Object.assign(atNoMutate, {
   mutate: atMutate,
 });

@@ -1,12 +1,10 @@
 const INSTRUCTION = Symbol("INSTRUCTION");
-export type Instruction<Input = any, Output = any> = {
+export type Instruction = {
   [INSTRUCTION]: true;
-  modifier: (input: Input) => Output;
+  modifier: (input: any) => any;
 };
 
-export const makeInstruction = <Input = any, Output = any>(
-  modifier: (input: Input) => Output
-): Instruction<Input, Output> => {
+export const makeInstruction = (modifier: (input: any) => any): Instruction => {
   return {
     [INSTRUCTION]: true,
     modifier,
