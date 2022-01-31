@@ -13,7 +13,7 @@
   "dependencies": {
     "immer": "^9.0.12",
     "lodash": "^4.17.21",
-    "serializable-types": "^0.8.0",
+    "serializable-types": "^0.8.1",
     "kame": "^0.6.3"
   },
   "devDependencies": {
