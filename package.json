@@ -2,21 +2,29 @@
   "name": "bidoof",
   "version": "0.1.0",
   "description": "value matching and transforming tool",
-  "main": "index.js",
+  "main": "dist/index.js",
   "types": "src/index.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
+  "keywords": [
+    "transform",
+    "object",
+    "array",
+    "value",
+    "runtime",
+    "type",
+    "match",
+    "patch",
+    "schema",
+    "declarative"
+  ],
   "author": "Lily Scott <me@suchipi.com>",
   "license": "MIT",
   "dependencies": {
     "immer": "^9.0.12",
     "lodash": "^4.17.21",
-    "serializable-types": "^0.8.1",
-    "kame": "^0.6.3"
+    "serializable-types": "^0.8.1"
   },
   "devDependencies": {
-    "@types/node": "^17.0.13"
+    "@types/node": "^17.0.13",
+    "typescript": "^4.5.5"
   }
 }

@@ -5,6 +5,7 @@ import immerProduce from "immer";
 
 export { t };
 
+const BIDOOF_INSTRUCTION = Symbol("BIDOOF_INSTRUCTION");
 export type BidoofInstruction<
   Kind extends string = string,
   Props extends {} = { [key: string]: any }
@@ -13,7 +14,6 @@ export type BidoofInstruction<
   kind: Kind;
 } & Props;
 
-const BIDOOF_INSTRUCTION = Symbol("BIDOOF_INSTRUCTION");
 const makeInstruction = <
   Kind extends string = string,
   Props extends {} = { [key: string]: any }
@@ -116,7 +116,7 @@ export type BidoofGroup = {
 export function collectGroups(
   matchersAndInstructions: Array<t.CoercableToTypeDef | BidoofInstruction>
 ): Array<BidoofGroup> {
-  const groups = [];
+  const groups: Array<BidoofGroup> = [];
   let currentGroup: BidoofGroup | null = null;
 
   for (const item of matchersAndInstructions) {
