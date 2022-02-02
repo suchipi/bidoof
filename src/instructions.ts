@@ -1,8 +1,12 @@
 import lodashMerge from "lodash/merge";
 import lodashGet from "lodash/get";
 import lodashSet from "lodash/set";
-import immerProduce from "immer";
+import { Immer } from "immer";
 import { Instruction, makeInstruction } from "./instruction";
+
+const immer = new Immer({
+  autoFreeze: false,
+});
 
 /**
  * Wrap a given instruction so that instead of mutating the target,
@@ -11,7 +15,7 @@ import { Instruction, makeInstruction } from "./instruction";
  */
 export function withoutMutating(instruction: Instruction): Instruction {
   return makeInstruction((input) => {
-    return immerProduce(input, (draft) => {
+    return immer.produce(input, (draft) => {
       instruction.modifier(draft);
     });
   });

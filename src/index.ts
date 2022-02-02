@@ -8,7 +8,7 @@ export { Instruction, Options, t };
 
 export const defaultOptions: Options = { stopAfterFirstMatch: false };
 
-export function makeBidoof(
+export function makeMapperFunction(
   programDescription: Array<t.CoercableToTypeDef | Instruction>,
   options: Options = defaultOptions
 ): (input: any) => any {
