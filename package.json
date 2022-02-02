@@ -1,6 +1,6 @@
 {
   "name": "bidoof",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "declarative value matching and transform/patching API",
   "main": "dist/index.js",
   "types": "src/index.ts",
